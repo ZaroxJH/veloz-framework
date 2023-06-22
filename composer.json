@@ -1,31 +1,31 @@
 {
-    "name": "zaroxjh/veloz-framework",
-    "description": "Your framework description",
-    "version": "1.0.0",
-    "license": "MIT",
-    "authors": [
-      {
-        "name": "Your Name",
-        "email": "your-email@example.com"
-      }
-    ],
-    "require": {
-      "php": "^8.2"
-    },
-    "autoload": {
-      "psr-4": {
-        "Veloz\\": "veloz"
-      }
-    },
+  "name": "zaroxjh/veloz-framework",
+  "description": "A veloz project",
+  "version": "1.0.0",
+  "license": "MIT",
+  "authors": [
+    {
+      "name": "Stefan Hoekstra",
+      "email": "info@zarox.nl"
+    }
+  ],
+  "require": {
+    "php": "^8.2"
+  },
+  
+  "autoload": {
     "files": [
       "Veloz/helpers/helpers.php"
     ],
-    "autoload-dev": {
-      "psr-4": {
-        "Veloz\\Tests\\": "tests"
-      }
-    },
-    "minimum-stability": "dev",
-    "prefer-stable": true
-  }
-  
+    "psr-4": {
+      "Veloz\\": "veloz"
+    }
+  },
+  "autoload-dev": {
+    "psr-4": {
+      "Veloz\\Tests\\": "tests"
+    }
+  },
+  "minimum-stability": "dev",
+  "prefer-stable": true
+}
