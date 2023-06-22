@@ -1,0 +1,31 @@
+{
+    "name": "zaroxjh/veloz-framework",
+    "description": "Your framework description",
+    "version": "1.0.0",
+    "license": "MIT",
+    "authors": [
+      {
+        "name": "Your Name",
+        "email": "your-email@example.com"
+      }
+    ],
+    "require": {
+      "php": "^8.2"
+    },
+    "autoload": {
+      "psr-4": {
+        "Veloz\\": "veloz"
+      }
+    },
+    "files": [
+      "Veloz/helpers/helpers.php"
+    ],
+    "autoload-dev": {
+      "psr-4": {
+        "Veloz\\Tests\\": "tests"
+      }
+    },
+    "minimum-stability": "dev",
+    "prefer-stable": true
+  }
+  
