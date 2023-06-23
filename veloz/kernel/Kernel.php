@@ -36,7 +36,7 @@ class Kernel
         }
 
         // If the env was not loaded, load it
-        $dotenv = \Dotenv\Dotenv::createImmutable(__DIR__ . '/../../');
+        $dotenv = \Dotenv\Dotenv::createImmutable(__DIR__ . '../../../../../');
         $dotenv->load();
     }
 
