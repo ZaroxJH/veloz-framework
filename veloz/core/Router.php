@@ -193,7 +193,7 @@ class Router
 
     private function load404(): bool
     {
-        $this->path = dirname(__DIR__, 2) . $_ENV['APP_ROOT'] . 'views/404.php';
+        $this->path = $_SERVER['DOCUMENT_ROOT'] . $_ENV['APP_ROOT'] . 'views/404.php';
 
         // Look for a 404 page in a views folder anywhere inside app
         return file_exists($this->path);
