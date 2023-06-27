@@ -350,16 +350,51 @@ if (! function_exists('set_headers')) {
 if (! function_exists('veloz_error_handler')) {
     function veloz_error_handler($errno, $errstr, $errfile, $errline)
     {
+
         $html = '<!DOCTYPE html>';
         $html .= '<html lang="en">';
         $html .= '<head>';
         $html .= '<meta charset="UTF-8">';
         $html .= '<meta name="viewport" content="width=device-width, initial-scale=1.0">';
         $html .= '<title>Error</title>';
+        $html .= '<style>';
+        $html .= 'body {';
+        $html .= '    background-color: #1c2331;';
+        $html .= '    color: #ffffff;';
+        $html .= '    font-family: monospace;';
+        $html .= '    display: flex;';
+        $html .= '    justify-content: center;';
+        $html .= '    align-items: center;';
+        $html .= '    height: 100vh;';
+        $html .= '    margin: 0;';
+        $html .= '}';
+        
+        $html .= '.container {';
+        $html .= '    max-width: 600px;';
+        $html .= '    text-align: center;';
+        $html .= '}';
+        
+        $html .= '.error-box {';
+        $html .= '    background-color: #34495e;';
+        $html .= '    color: #ffffff;';
+        $html .= '    padding: 20px;';
+        $html .= '    border-radius: 10px;';
+        $html .= '    margin-bottom: 20px;';
+        $html .= '}';
+        
+        $html .= '.error-box h3 {';
+        $html .= '    margin-top: 0;';
+        $html .= '}';
+        
+        $html .= '.error-box p {';
+        $html .= '    margin: 10px 0;';
+        $html .= '}';
+        
+        $html .= '</style>';
         $html .= '</head>';
-        $html .= '<body style="background-color: #cfcfcf;">';
-        $html .= '<div style="display: flex; justify-content: center; align-items: center; height: 100vh; width: 100vw; flex-direction: column;">';
-        $html .= '<div style="background-color: #f8d7da; color: #721c24; padding: 10px; border-radius: 5px; margin: 10px 0;">';
+        $html .= '<body>';
+        $html .= '<div class="container">';
+        $html .= '<div class="error-box">';
         $html .= '<h3>Error</h3>';
         $html .= '<p><strong>Error number:</strong> ' . $errno . '</p>';
         $html .= '<p><strong>Error message:</strong> ' . $errstr . '</p>';
@@ -369,7 +404,6 @@ if (! function_exists('veloz_error_handler')) {
         $html .= '</div>';
         $html .= '</body>';
         $html .= '</html>';
-
         echo $html;
         exit();
     }
@@ -378,34 +412,83 @@ if (! function_exists('veloz_error_handler')) {
 if (! function_exists('veloz_exception_handler')) {
     function veloz_exception_handler($e)
     {
-        $html = '<!DOCTYPE html>';
-        $html .= '<html lang="en">';
-        $html .= '<head>';
-        $html .= '<meta charset="UTF-8">';
-        $html .= '<meta name="viewport" content="width=device-width, initial-scale=1.0">';
-        $html .= '<title>Exception</title>';
-        $html .= '</head>';
-        $html .= '<body style="background-color: #cfcfcf;">';
-        $html .= '<div style="display: flex; justify-content: center; align-items: center; height: 100vh; width: 100vw; flex-direction: column;">';
-        $html .= '<div style="background-color: #f8d7da; color: #721c24; height:auto; width: 85vw; padding: 10px; border-radius: 5px; margin: 10px 0;">';
-        $html .= '<h3>Exception</h3>';
-        $html .= '<p><strong>Exception message:</strong> ' . $e->getMessage() . '</p>';
-        $html .= '<p><strong>Exception file:</strong> ' . $e->getFile() . '</p>';
-        $html .= '<p><strong>Exception line:</strong> ' . $e->getLine() . '</p>';
+        $errorMessage = $e->getMessage();
+        $errorFile = $e->getFile();
+        $errorLine = $e->getLine();
+        $stackTrace = $e->getTraceAsString();
 
-        // Uses php to seperate each line of the stack trace
-        $stackTrace = explode('#', $e->getTraceAsString());
-        $html .= '<p><strong>Stack trace:</strong></p>';
-        // Shows list but without dots or numbers
-        $html .= '<ul style="list-style-type: none; padding: 0;">';
-        foreach ($stackTrace as $trace) {
-            $html .= '<li>' . $trace . '</li>';
-        }
-        $html .= '</ul>';
-        $html .= '</div>';
-        $html .= '</div>';
-        $html .= '</body>';
-        $html .= '</html>';
+        $html = <<<HTML
+        <!DOCTYPE html>
+        <html lang="en">
+        <head>
+            <meta charset="UTF-8">
+            <meta name="viewport" content="width=device-width, initial-scale=1.0">
+            <title>Exception</title>
+            <style>
+                body {
+                    background-color: #1c2331;
+                    color: #ffffff;
+                    font-family: monospace;
+                    display: flex;
+                    justify-content: center;
+                    align-items: center;
+                    height: 100vh;
+                    margin: 0;
+                }
+
+                .container {
+                    max-width: 85vw;
+                    text-align: center;
+                }
+
+                .exception-box {
+                    background-color: #34495e;
+                    color: #ffffff;
+                    padding: 20px;
+                    border-radius: 5px;
+                    margin: 10px 0;
+                }
+
+                .exception-box h3 {
+                    margin-top: 0;
+                }
+
+                .exception-box p {
+                    margin: 10px 0;
+                }
+
+                .stack-trace-container {
+                    background-color: #000000;
+                    color: #ffffff;
+                    padding: 10px;
+                    border-radius: 5px;
+                    margin-top: 20px;
+                    max-height: 200px;
+                    overflow-y: auto;
+                    text-align: left;
+                }
+
+                .stack-trace {
+                    white-space: pre;
+                }
+            </style>
+        </head>
+        <body>
+            <div class="container">
+                <div class="exception-box">
+                    <h3>Exception</h3>
+                    <p><strong>Exception message:</strong> $errorMessage</p>
+                    <p><strong>Exception file:</strong> $errorFile</p>
+                    <p><strong>Exception line:</strong> $errorLine</p>
+                    <p><strong>Stack trace:</strong></p>
+                    <div class="stack-trace-container">
+                        <pre class="stack-trace">$stackTrace</pre>
+                    </div>
+                </div>
+            </div>
+        </body>
+        </html>
+        HTML;
 
         echo $html;
         exit();
