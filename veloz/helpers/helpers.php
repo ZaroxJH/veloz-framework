@@ -300,14 +300,23 @@ if (! function_exists('log_action')) {
     {
         // Log the user agent, requested page, request method, ip address to database
         $log = new Log();
-        $payload = null;
-
-        if (isset($GET) && !empty($GET)) {
-            $payload = json_encode($GET);
-        }
-
-        if (isset($POST) && !empty($POST)) {
-            $payload = json_encode($POST);
+        
+        switch($server['REQUEST_METHOD']) {
+            case 'GET':
+                $payload = $_GET;
+                break;
+            case 'POST':
+                $payload = file_get_contents('php://input');
+                break;
+            case 'PUT':
+                $payload = file_get_contents('php://input');
+                break;
+            case 'DELETE':
+                $payload = file_get_contents('php://input');
+                break;
+            default:
+                $payload = null;
+                break;
         }
 
         $log->userAgent = $server['HTTP_USER_AGENT'] ?? 'Unkown';
