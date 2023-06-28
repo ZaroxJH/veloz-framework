@@ -350,60 +350,67 @@ if (! function_exists('set_headers')) {
 if (! function_exists('veloz_error_handler')) {
     function veloz_error_handler($errno, $errstr, $errfile, $errline)
     {
-
-        $html = '<!DOCTYPE html>';
-        $html .= '<html lang="en">';
-        $html .= '<head>';
-        $html .= '<meta charset="UTF-8">';
-        $html .= '<meta name="viewport" content="width=device-width, initial-scale=1.0">';
-        $html .= '<title>Error</title>';
-        $html .= '<style>';
-        $html .= 'body {';
-        $html .= '    background-color: #1c2331;';
-        $html .= '    color: #ffffff;';
-        $html .= '    font-family: monospace;';
-        $html .= '    display: flex;';
-        $html .= '    justify-content: center;';
-        $html .= '    align-items: center;';
-        $html .= '    height: 100vh;';
-        $html .= '    margin: 0;';
-        $html .= '}';
+        $html = <<<HTML
+        <!DOCTYPE html>
+        <html lang="en">
+        <head>
+            <meta charset="UTF-8">
+            <meta name="viewport" content="width=device-width, initial-scale=1.0">
+            <title>Error</title>
+            <style>
+                body {
+                    background-color: #1c2331;
+                    color: #ffffff;
+                    font-family: monospace;
+                    display: flex;
+                    justify-content: center;
+                    align-items: center;
+                    height: 100vh;
+                    margin: 0;
+                }
         
-        $html .= '.container {';
-        $html .= '    max-width: 600px;';
-        $html .= '    text-align: center;';
-        $html .= '}';
+                .container {
+                    max-width: 600px;
+                    text-align: center;
+                }
         
-        $html .= '.error-box {';
-        $html .= '    background-color: #34495e;';
-        $html .= '    color: #ffffff;';
-        $html .= '    padding: 20px;';
-        $html .= '    border-radius: 10px;';
-        $html .= '    margin-bottom: 20px;';
-        $html .= '}';
+                .error-box {
+                    background-color: #34495e;
+                    color: #ffffff;
+                    padding: 20px;
+                    border-radius: 10px;
+                    margin-bottom: 20px;
+                }
         
-        $html .= '.error-box h3 {';
-        $html .= '    margin-top: 0;';
-        $html .= '}';
+                .error-box h3 {
+                    margin-top: 0;
+                }
         
-        $html .= '.error-box p {';
-        $html .= '    margin: 10px 0;';
-        $html .= '}';
+                .error-box p {
+                    margin: 10px 0;
+                }
         
-        $html .= '</style>';
-        $html .= '</head>';
-        $html .= '<body>';
-        $html .= '<div class="container">';
-        $html .= '<div class="error-box">';
-        $html .= '<h3>Error</h3>';
-        $html .= '<p><strong>Error number:</strong> ' . $errno . '</p>';
-        $html .= '<p><strong>Error message:</strong> ' . $errstr . '</p>';
-        $html .= '<p><strong>Error file:</strong> ' . $errfile . '</p>';
-        $html .= '<p><strong>Error line:</strong> ' . $errline . '</p>';
-        $html .= '</div>';
-        $html .= '</div>';
-        $html .= '</body>';
-        $html .= '</html>';
+                .version {
+                    font-size: 12px;
+                    margin-top: 20px !important;
+                }
+            </style>
+        </head>
+        <body>
+            <div class="container">
+                <div class="error-box">
+                    <h3>Error</h3>
+                    <p><strong>Error number:</strong> {$errno}</p>
+                    <p><strong>Error message:</strong> {$errstr}</p>
+                    <p><strong>Error file:</strong> {$errfile}</p>
+                    <p><strong>Error line:</strong> {$errline}</p>
+                    <p class="version">Veloz version: {vf_version}</p>
+                </div>
+            </div>
+        </body>
+        </html>
+        HTML;
+        
         echo $html;
         exit();
     }
@@ -471,6 +478,11 @@ if (! function_exists('veloz_exception_handler')) {
                 .stack-trace {
                     white-space: pre;
                 }
+
+                .version {
+                    font-size: 12px;
+                    margin-top: 20px !important;
+                }
             </style>
         </head>
         <body>
@@ -484,6 +496,7 @@ if (! function_exists('veloz_exception_handler')) {
                     <div class="stack-trace-container">
                         <pre class="stack-trace">$stackTrace</pre>
                     </div>
+                    <p class="version">Veloz version: {vf_version}</p>
                 </div>
             </div>
         </body>
