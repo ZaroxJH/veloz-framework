@@ -495,6 +495,18 @@ if (! function_exists('veloz_exception_handler')) {
     }
 }
 
+if (! function_exists('server_root')) {
+    /**
+     * Returns the server root.
+     *
+     * @return string
+     */
+    function server_root()
+    {
+        return $_SERVER['DOCUMENT_ROOT'];
+    }
+}
+
 if (! function_exists('format_datetime')) {
     /**
      * Formats a datetime.
