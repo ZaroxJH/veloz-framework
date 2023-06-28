@@ -10,10 +10,12 @@ class View
     protected string $viewPath;
     protected string $appPath;
     protected array $data = [];
+    protected string $root = '';
 
     public function __construct()
     {
-        $this->appPath = dirname(__DIR__, 2) . $_ENV['APP_ROOT'] . 'views';
+        $this->root = $_SERVER['DOCUMENT_ROOT'];
+        $this->appPath = $this->root . $_ENV['APP_ROOT'] . 'views';
     }
 
     /**
@@ -29,7 +31,7 @@ class View
     public function include($path, string $view, $layout, array $data = []): string
     {
         // Define the right paths
-        $this->viewPath = dirname(__DIR__, 2) . '/'. $path .'/views';
+        $this->viewPath = $root . '/'. $path .'/views';
 
         // Throw an exception when the view is not found
         if (!is_file($this->viewPath . '/' . $view . '.php')) {

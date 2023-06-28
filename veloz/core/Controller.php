@@ -7,6 +7,7 @@ class Controller extends View
     protected function view(string $view, array $data = [], $includeLayout = true): string|bool
     {
         $layout = null;
+        $root = $_SERVER['DOCUMENT_ROOT'];
         
         $path = strtolower($_ENV['APP_ROOT']);
 
@@ -24,14 +25,14 @@ class Controller extends View
         if (isset($class[0])) {
             if ($class[0] !== 'App') {
                 $path = strtolower($class[0] . '/' . $class[1]);
-                if (file_exists(dirname(__DIR__, 2) . '/'. $path .'/config.php')) {
-                    include dirname(__DIR__, 2) . '/'. $path .'/config.php';
+                if (file_exists($root . '/'. $path .'/config.php')) {
+                    include $root . '/'. $path .'/config.php';
                 }
             }
         }
 
         if ($includeLayout) {
-            $layout = dirname(__DIR__, 2) . $_ENV['APP_ROOT'] . 'views/layouts/app.php';
+            $layout = $root . $_ENV['APP_ROOT'] . 'views/layouts/app.php';
         }
 
         return $this->include($path, $view, $layout, $data);
