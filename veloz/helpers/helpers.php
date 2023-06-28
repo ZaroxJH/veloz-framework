@@ -300,11 +300,20 @@ if (! function_exists('log_action')) {
     {
         // Log the user agent, requested page, request method, ip address to database
         $log = new Log();
+        $payload = null;
+
+        if (isset($GET) && !empty($GET)) {
+            $payload = json_encode($GET);
+        }
+
+        if (isset($POST) && !empty($POST)) {
+            $payload = json_encode($POST);
+        }
 
         $log->userAgent = $server['HTTP_USER_AGENT'] ?? 'Unkown';
         $log->requestedPage = $server['REQUEST_URI'] ?? null;
         $log->requestMethod = $server['REQUEST_METHOD'] ?? null;
-        $log->payload = json_encode($_POST) ?? json_encode($_GET) ?? null;
+        $log->payload = $payload;
         $log->ipAddress = $server['REMOTE_ADDR'] ?? null;
         $log->statusCode = http_response_code() ?? $server['REDIRECT_STATUS'] ?? null;
         $log->userId = null;
