@@ -17,6 +17,7 @@ class Log extends Model
     public string $ipAddress;
     public int|null $statusCode;
     public int|null $userId;
+    public string $payload;
 
     private string $date;
     private array $params;
@@ -103,6 +104,7 @@ class Log extends Model
             'ip_address' => $this->ipAddress,
             'user_agent' => $this->userAgent,
             'method' => $this->requestMethod,
+            'payload' => $this->payload,
             'url' => $this->requestedPage,
             'status_code' => $this->statusCode,
         ];

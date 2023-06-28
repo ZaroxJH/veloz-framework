@@ -304,8 +304,9 @@ if (! function_exists('log_action')) {
         $log->userAgent = $server['HTTP_USER_AGENT'] ?? 'Unkown';
         $log->requestedPage = $server['REQUEST_URI'] ?? null;
         $log->requestMethod = $server['REQUEST_METHOD'] ?? null;
+        $log->payload = json_encode($_POST) ?? json_encode($_GET) ?? null;
         $log->ipAddress = $server['REMOTE_ADDR'] ?? null;
-        $log->statusCode = $server['REDIRECT_STATUS'] ?? null;
+        $log->statusCode = http_response_code() ?? $server['REDIRECT_STATUS'] ?? null;
         $log->userId = null;
 
         // Checks if the Auth class exists
