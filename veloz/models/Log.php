@@ -17,7 +17,7 @@ class Log extends Model
     public string $ipAddress;
     public int|null $statusCode;
     public int|null $userId;
-    public string $payload;
+    public string|null $payload;
 
     private string $date;
     private array $params;
