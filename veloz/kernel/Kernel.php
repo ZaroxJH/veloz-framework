@@ -5,6 +5,7 @@ namespace Veloz\Kernel;
 class Kernel
 {
     private string $commandsRoot;
+    private string $root = '';
 
     private array $validCommands = [
         'generate' => [
@@ -23,6 +24,9 @@ class Kernel
 
     public function __construct()
     {
+        // Navigates to the root folder
+        // chdir($this->root);
+
         $this->loadEnv();
         $this->commandsRoot = 'Veloz\\Kernel\\Commands\\';
     }
@@ -31,12 +35,14 @@ class Kernel
     {
         // Throws an error if the .env file is not found
         if (!file_exists('.env')) {
-            echoOutput('The .env file was not found. Exiting...', 1);
+            echoOutput('The .env file was not found, in directory: ' . getcwd());
+            echoOutput('Have you tried running cp .env.example .env in the root directory?', 1);
+            echoOutput('Exiting...', 1, 2);
             exit;
         }
 
         // If the env was not loaded, load it
-        $dotenv = \Dotenv\Dotenv::createImmutable(__DIR__ . '../../../../../');
+        $dotenv = \Dotenv\Dotenv::createImmutable(getcwd());
         $dotenv->load();
     }
 
