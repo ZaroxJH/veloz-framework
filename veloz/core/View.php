@@ -31,7 +31,7 @@ class View
     public function include($path, string $view, $layout, array $data = []): string
     {
         // Define the right paths
-        $this->viewPath = $root . '/'. $path .'/views';
+        $this->viewPath = $this->root . '/'. $path .'/views';
 
         // Throw an exception when the view is not found
         if (!is_file($this->viewPath . '/' . $view . '.php')) {
