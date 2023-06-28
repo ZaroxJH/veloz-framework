@@ -34,6 +34,11 @@ class Log extends Model
         }
 
         $this->logPath = $logPath;
+
+        // Checks if logs folder exists
+        if (!file_exists($_SERVER['DOCUMENT_ROOT'] . $this->logPath)) {
+            mkdir($_SERVER['DOCUMENT_ROOT'] . $this->logPath);
+        }
     }
 
     public function saveToFile()
@@ -55,10 +60,10 @@ class Log extends Model
     private function insertToFile($log)
     {
         $this->date = date('Y-m');
-        $this->logFile = dirname(__DIR__, 2) . $this->logPath . $this->date . '.log';
+        $this->logFile = server_root() . $this->logPath . $this->date . '.log';
 
-        if (!$file = fopen($this->logFile, 'a')) {
-            $file = fopen($this->logFile, 'w');
+        if (!file_exists($this->logFile)) {
+            $this->createLogFile();
         }
 
         $file = fopen($this->logFile, 'a');
