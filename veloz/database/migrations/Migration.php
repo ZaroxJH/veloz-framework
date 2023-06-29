@@ -9,6 +9,10 @@ class Migration
     public function __construct()
     {
         $this->aedificator = new Aedificator();
+        
+        if (!$this->aedificator->init()) {
+            exit;
+        }
     }
 
     public function aedificator()

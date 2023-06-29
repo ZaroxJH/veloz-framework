@@ -4,9 +4,10 @@ namespace Veloz\Kernel\Commands;
 
 class CreateController
 {
-    private $root = __DIR__ . '/../../../';
+    private $veloz_root = __DIR__;
+    private $root = __DIR__ . '/../../../../../../';
     private $controller_folder = 'app/controllers/';
-    private $template_folder = 'veloz/kernel/templates/';
+    private $template_folder = '/../../../veloz/kernel/templates/';
 
     public function __construct()
     {
@@ -33,7 +34,7 @@ class CreateController
         }
 
         $controller_folder = $this->root . $this->controller_folder;
-        $template_folder = $this->root . $this->template_folder;
+        $template_folder = $this->veloz_root . $this->template_folder;
 
         if (!is_dir($controller_folder)) {
             echoOutput('Controller folder not found. Exiting...', 1);
@@ -66,7 +67,7 @@ class CreateController
         }
 
         $controller_file = $this->root . $this->controller_folder . $controller_name . '.php';
-        $controller_template = file_get_contents($this->root . $this->template_folder . 'controller_template.php');
+        $controller_template = file_get_contents($this->veloz_root . $this->template_folder . 'controller_template.php');
         $controller_template = str_replace('ControllerName', $controller_name, $controller_template);
         file_put_contents($controller_file, $controller_template);
 

@@ -16,7 +16,7 @@ class Aedificator
         'DB_PORT',
     ];
 
-    public function __construct()
+    public function init()
     {
         if (!$this->connect()) {
             echoOutput('An error occured while trying to connect to the database: ' . $this->databaseError, 1);
@@ -50,6 +50,7 @@ class Aedificator
 
             return false;
         }
+        echoOutput('Connected to the database: ' . $_ENV['DB_NAME'], 1);
         return true;
     }
 
