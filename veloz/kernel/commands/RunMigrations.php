@@ -4,6 +4,8 @@ namespace Veloz\Kernel\Commands;
 
 class RunMigrations
 {
+    private $root = __DIR__ . '/../../../../../../';
+
     public function __construct()
     {
         
@@ -19,7 +21,7 @@ class RunMigrations
         echoOutput('Running migrations...', 1);
 
         // Runs the migrations from the root/database/migrations folder
-        $migrations = glob(__DIR__ . '/../../../database/migrations/*.php');
+        $migrations = glob($this->root . 'database/migrations/*.php');
 
         if (empty($migrations)) {
             echoOutput('No migrations found.', 1);
@@ -90,6 +92,8 @@ class RunMigrations
                 // Try to run the next migration
                 continue;
             }
+
+            $migration->create();
 
             echoOutput('Migration complete.', 1, 2);
         }
