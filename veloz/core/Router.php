@@ -9,6 +9,7 @@ class Router
     private string $appUrl;
     public array $action;
     private string $path;
+    public string|null $defaultMiddlewareMethod;
     
     protected array $routes = [];
     protected array $middleware = [];
@@ -34,6 +35,8 @@ class Router
         } elseif (str_contains($this->appUrl, 'https://')) {
             $this->appUrl = str_replace('https://', '', $this->appUrl);
         }
+
+        $this->defaultMiddlewareMethod = null;
     }
 
     public function add(string $method, string $pattern, $callback = null, $allowAll = null, string $projectDirectory = null, $subdomain = null)
@@ -68,22 +71,43 @@ class Router
         $this->add('GET', $path, null, true, $realpath, $subdomain)->middleware($middleware);
     }
 
-    public function middlewareRegister(string $name, callable $callback): void
+    public function middlewareRegister(string $name, callable $callback, $methodName): void
     {
-        $this->middleware[$name] = $callback;
-    }
+        $this->middleware[$name]['methods'][$methodName] = $callback;
+    }    
 
-    public function middleware($middleware = null)
+    public function middleware($middleware = null, $method = null)
     {
         // Handles the middleware
         if (is_string($middleware)) {
+            if ($method) {
+                $middleware .= ':' . $method;
+            }
             $this->routes[count($this->routes) - 1]['middleware'][] = $middleware;
         }
 
-        // Handles the middleware if it was used on a group
+        // Handles the middleware if it was used as a group
         if (is_array($middleware)) {
-            foreach ($middleware as $m) {
-                $this->routes[count($this->routes) - 1]['middleware'][] = $m;
+            if (!is_array($method) && $method !== null) {
+                throw new \Exception('Invalid middleware method configuration. Method should be an array or nothing.');
+            }
+    
+            $middlewareCount = count($middleware);
+            $methodCount = count($method);
+    
+            if ($methodCount > $middlewareCount) {
+                throw new \Exception('Invalid middleware method configuration. More methods provided than middleware.');
+            }
+    
+            for ($i = 0; $i < $middlewareCount; $i++) {
+                $middlewareName = $middleware[$i];
+                $middlewareMethod = ($i < $methodCount) ? $method[$i] : null;
+    
+                if ($middlewareMethod) {
+                    $middlewareName .= ':' . $middlewareMethod;
+                }
+    
+                $this->routes[count($this->routes) - 1]['middleware'][] = $middlewareName;
             }
         }
     }
@@ -139,10 +163,24 @@ class Router
     {
         // Execute middleware
         foreach ($route['middleware'] as $middleware) {
-            if (!in_array($middleware, array_keys($this->middleware))) {
-                throw new \Exception('Middleware not found. Check the middleware name in the respective class.');
+            $middlewareName = $middleware;
+            $middlewareMethod = $this->defaultMiddlewareMethod;
+    
+            if (str_contains($middleware, ':')) {
+                [$middlewareName, $middlewareMethod] = explode(':', $middleware);
             }
-            $this->middleware[$middleware]();
+    
+            if (!in_array($middlewareName, array_keys($this->middleware))) {
+                throw new \Exception('Middleware "'.$middlewareName.'" not found. Check the middleware name in the respective class.');
+            }
+
+            foreach ($this->middleware[$middlewareName]['methods'] as $method => $callback) {
+                // Checks if the middlewareMethod matches any of the methods in the middleware class
+                if ($middlewareMethod === $method) {
+                    // Executes callback
+                    $callback();
+                }
+            }
         }
 
         // Extract controller class and action from callback string
