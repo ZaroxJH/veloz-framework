@@ -4,6 +4,8 @@ namespace Veloz\Kernel\Commands;
 
 class GenerateAdminKey
 {
+    private $root = __DIR__ . '/../../../../../../';
+
     public function __construct()
     {
         
@@ -42,7 +44,7 @@ class GenerateAdminKey
         echoOutput('No ' . $var . ' variable found.', 1);
         sleep(1);
         echoOutput('Generating ' . $var . ' variable...', 1);
-        file_put_contents(__DIR__ . '/../../.env', PHP_EOL . $var . '=', FILE_APPEND);
+        file_put_contents($this->root . '.env', PHP_EOL . $var . '=', FILE_APPEND);
         sleep(1);
         echoOutput($var . ' variable generated.', 1);
     }
@@ -50,9 +52,9 @@ class GenerateAdminKey
     private function write_to_env($key, $value)
     {
         // fopen the env
-        $env = fopen(__DIR__ . '/../../../.env', 'r+');
+        $env = fopen($this->root . '.env', 'r+');
         // Get the contents of the env
-        $contents = fread($env, filesize(__DIR__ . '/../../../.env'));
+        $contents = fread($env, filesize($this->root . '.env'));
         // Find the key
         $env_key = strpos($contents, $key);
         // Move the pointer to the key

@@ -4,9 +4,10 @@ namespace Veloz\Kernel\Commands;
 
 class CreateModel
 {
-    private $root = __DIR__ . '/../../../';
+    private $root = __DIR__ . '/../../../../../../';
+    private $veloz_root = __DIR__;
     private $model_folder = 'app/models/';
-    private $template_folder = 'veloz/kernel/templates/';
+    private $template_folder = '/../../../veloz/kernel/templates/';
 
     public function __construct()
     {
@@ -33,7 +34,7 @@ class CreateModel
         
         // Get the model and template folder
         $model_folder = $this->root . $this->model_folder;
-        $template_folder = $this->root . $this->template_folder;
+        $template_folder = $this->veloz_root . $this->template_folder;
 
         // If the model folder does not exist, exit
         if (!is_dir($model_folder)) {
