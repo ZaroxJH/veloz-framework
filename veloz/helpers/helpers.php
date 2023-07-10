@@ -162,8 +162,9 @@ if (! function_exists('redirect')) {
      */
     #[NoReturn] function redirect($url): void
     {
+        session_write_close();
         header('Location: ' . $_ENV['APP_URL'] . $url);
-        exit;
+        exit();
     }
 }
 
@@ -172,7 +173,7 @@ if (! function_exists('set_exception')) {
      * Sets an exception in the session.
      *
      */
-    function set_exception($message, $type): null | bool
+    function set_exception($message, $type, $fade): null | bool
     {
         $acceptedTypes = [
             'success',
@@ -185,7 +186,7 @@ if (! function_exists('set_exception')) {
             return false;
         }
 
-        return (new HomeException)->$type($message);
+        return (new HomeException)->set($message, $type, $fade);
     }
 }
 
@@ -347,7 +348,7 @@ if (! function_exists('setup_server')) {
         ini_set( 'session.cookie_secure', 1 );
         ini_set( 'expose_php', 0 );
         set_headers();
-        session_name('Veloz');
+        // session_name('Veloz');
         session_start();
     }
 }
@@ -526,6 +527,22 @@ if (! function_exists('veloz_exception_handler')) {
         exit();
     }
 }
+
+if (! function_exists('process_response')) {
+    /**
+     * Sets an exception.
+     *
+     * @param string $message
+     * @param string $type
+     * @return void
+     */
+    function process_response(string $message, string $type, $page, $fade = false): bool|string
+    {
+        set_exception($message, $type, $fade);
+        redirect($page);
+    }
+}
+
 
 if (! function_exists('server_root')) {
     /**

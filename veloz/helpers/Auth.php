@@ -22,16 +22,16 @@ class Auth
     public static function check(): bool
     {
         // First we check if the session_id is in the session
-        if (!isset($_SESSION['home-dashboard']['user']['sessionId'])) {
+        if (!isset($_SESSION['veloz-dashboard']['user']['sessionId'])) {
             return false;
         }
 
         // Now we check if the session exists in the database
-        if (!Session::exists(['user_id' => Auth::id(), 'session_id' => $_SESSION['home-dashboard']['user']['sessionId']])) {
+        if (!Session::exists(['user_id' => Auth::id(), 'session_id' => $_SESSION['veloz-dashboard']['user']['sessionId']])) {
             return false;
         }
 
-        if (!isset($_SESSION['home-dashboard']['user']) && !self::user()) {
+        if (!isset($_SESSION['veloz-dashboard']['user']) && !self::user()) {
             return false;
         }
 
@@ -65,7 +65,7 @@ class Auth
 
     public static function id()
     {
-        return home_session('user.id');
+        return veloz_session('user.id');
     }
 
     public static function isAdmin(): bool
@@ -78,11 +78,11 @@ class Auth
 
     public static function set($user): void
     {
-        home_session_set('user', [
-            'id' => $user['id'] ?? $_SESSION['home-dashboard']['user']['id'] ?? '',
+        veloz_session_set('user', [
+            'id' => $user['id'] ?? $_SESSION['veloz-dashboard']['user']['id'] ?? '',
             'name' => $user['name'] ?? "",
-            'sessionId' => $user['sessionId'] ?? $_SESSION['home-dashboard']['user']['sessionId'] ?? '',
-            'role_id' => $user['role_id'] ?? $_SESSION['home-dashboard']['user']['role_id'] ?? '',
+            'sessionId' => $user['sessionId'] ?? $_SESSION['veloz-dashboard']['user']['sessionId'] ?? '',
+            'role_id' => $user['role_id'] ?? $_SESSION['veloz-dashboard']['user']['role_id'] ?? '',
         ]);
     }
 
@@ -130,11 +130,11 @@ class Auth
                 $user['sessionId'] = $sessionId;
                 Session::store($user['id'], $sessionId);
                 self::set($user);
-                unset ($_SESSION['home-dashboard']['email']);
+                unset ($_SESSION['veloz-dashboard']['email']);
                 return true;
             }
         }
-        home_session_set('email', $credentials['email']);
+        veloz_session_set('email', $credentials['email']);
         return false;
     }
 

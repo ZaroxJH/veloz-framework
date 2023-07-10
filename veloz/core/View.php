@@ -11,6 +11,7 @@ class View
     protected string $appPath;
     protected array $data = [];
     protected string $root = '';
+    protected bool $checked = false;
 
     public function __construct()
     {
@@ -45,12 +46,13 @@ class View
 
         if (isset($titlePrefix)) {
             if (isset($_ENV['TITLE_PREFIX'])) {
-                $title = $title . $_ENV['TITLE_PREFIX'];
+                $title .= $_ENV['TITLE_PREFIX'];
             }
         }
 
         include $this->viewPath . '/' . $view . '.php';
-        if ($notice = check_notice()) {
+
+        if (!$layout && $notice = check_notice()) {
             extract($notice);
             include_once $this->appPath . '/partials/notification.php';
         }
@@ -70,6 +72,12 @@ class View
                     include_once $adminLayout;
                 }
             }
+
+            if ($notice = check_notice()) {
+                extract($notice);
+                include_once $this->appPath . '/partials/notification.php';
+            }
+
             $content = ob_get_clean();
         }
 
