@@ -19,6 +19,11 @@ class View
         $this->appPath = $this->root . $_ENV['APP_ROOT'] . 'views';
     }
 
+    public function set_new_path(string $path): void
+    {
+        $this->appPath = $this->root . $path . 'views';
+    }
+
     /**
      * Includes the view file and returns the content
      *
