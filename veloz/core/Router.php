@@ -12,6 +12,7 @@ class Router
     public string|null $defaultMiddlewareMethod;
     
     protected array $routes = [];
+    protected array $groupIdentifier = [];
     protected array $middleware = [];
     protected array $subdomains = [];
     protected $subFolder = '';
@@ -39,7 +40,7 @@ class Router
         $this->defaultMiddlewareMethod = null;
     }
 
-    public function add(string $method, string $pattern, $callback = null, $allowAll = null, string $projectDirectory = null, $subdomain = null)
+    public function add(string $method, string $pattern, $callback = null, $group = false, $allowAll = null, string $projectDirectory = null, $subdomain = null)
     {
         // Use a regular expression to match the entire url, not just part of it
         $full = '#^' . $this->subFolder . $pattern . '$#';
@@ -50,6 +51,7 @@ class Router
             'filtered' => $pattern,
             'callback' => $callback,
             'middleware' => [],
+            'group' => $group,
             'allowAll' => $allowAll,
             'projectDirectory' => $projectDirectory,
             'subDomain' => $subdomain,
@@ -60,8 +62,20 @@ class Router
 
     public function group(...$routes)
     {
+        // Creates a new group identifier
+        $identifier = rand(1000000000000000, 9999999999999999);
+
+        $i = 0;
+        while (in_array($identifier, $this->groupIdentifier) && $i < 100) {
+            $identifier = rand(1000000000000000, 9999999999999999);
+            $i++;
+        }
+
+        // Add the identifier to the array
+        $this->groupIdentifier[] = $identifier;
+
         foreach ($routes as $route) {
-            $this->add($route[0], $route[1], $route[2]);
+            $this->add($route[0], $route[1], $route[2], $identifier);
         }
 
         return $this;
@@ -83,7 +97,19 @@ class Router
             if ($method) {
                 $middleware .= ':' . $method;
             }
-            $this->routes[count($this->routes) - 1]['middleware'][] = $middleware;
+            
+            // Checks if the last route has a group
+            if ($this->routes[count($this->routes) - 1]['group']) {
+                // Adds the middleware to all routes with this group identifier
+                foreach ($this->routes as $key => $route) {
+                    if ($route['group'] === $this->routes[count($this->routes) - 1]['group']) {
+                        $this->routes[$key]['middleware'][] = $middleware;
+                    }
+                }
+                return;
+            }
+
+            $this->routes[count($this->routes) - 1]['middleware'] = [$middleware];
         }
 
         // Handles the middleware if it was used as a group
