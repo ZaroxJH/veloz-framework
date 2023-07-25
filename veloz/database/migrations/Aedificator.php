@@ -7,7 +7,8 @@ use Veloz\Database\DB;
 class Aedificator
 {
     private string $table;
-    private string $databaseError;
+    public string $databaseError = 'unknown';
+    private $lastResult;
     private array $connectVariables = [
         'DB_HOST',
         'DB_USERNAME',
@@ -77,6 +78,16 @@ class Aedificator
         }
 
         return true;
+    }
+
+    /**
+     * Removes all data from the table
+     * @param array $data
+     */
+    public function clearTable()
+    {
+        $query = "TRUNCATE TABLE {$this->table}";
+        return $this->query($query);
     }
 
     /**
@@ -186,6 +197,69 @@ class Aedificator
     {
         $query = "DROP TABLE {$this->table}";
         return $this->query($query);
+    }
+
+    /**
+     * fills the table with data
+     * 
+     */
+    public function fillTable(array $data)
+    {
+        echoOutput('Filling table with ' . count($data) . ' rows', 1, 1);
+
+        $startTime = microtime(true);
+
+        foreach ($data as $row) {
+            $this->fillRow($row);
+        }
+
+        $endTime = microtime(true);
+
+        echoOutput('Finished in ' . round($endTime - $startTime, 2) . ' seconds', 1, 1);
+
+        return true;
+    }
+
+    /**
+     * Fills a row
+     * @param array $row ex: 'option_name' => 'site_name', 'option_value' => 'Velovox'
+     */
+    private function fillRow(array $row)
+    {
+        $columns = [];
+        $values = [];
+
+        foreach ($row as $column => $value) {
+            $columns[] = $column;
+            $values[] = "'" . $value . "'";
+        }
+
+        $columns = implode(', ', $columns);
+        $values = implode(', ', $values);
+
+        $query = "INSERT INTO {$this->table} ({$columns}) VALUES ({$values})";
+
+        echoOutput('Inserting values: ' . $values, 0);
+
+        return $this->query($query);
+    }
+
+    /**
+     * Checks if a table has content
+     * 
+     */
+    public function hasContent()
+    {
+        $query = "SELECT * FROM {$this->table} LIMIT 1";
+
+        try {
+            DB::query($query);
+        } catch (\PDOException $e) {
+            $this->databaseError = $e->getMessage();
+            return false;
+        }
+
+        return true;
     }
 
     private function query(string $query)

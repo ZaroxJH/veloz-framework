@@ -15,9 +15,12 @@ class Kernel
             'migration',
             'controller',
             'model',
+            'seeder',
         ],
         'run' => [
             'migrations',
+            'seeders',
+            'seeder',
         ],
         'help',
     ];
@@ -75,6 +78,12 @@ class Kernel
             return $this->help();
         }
 
+        // Seperates the command from the options
+        $options = explode(' ', $cmd);
+
+        // Set the option to be a string
+        $options = $options[1] ?? null;
+
         // Seperates the command from the arguments
         $cmd = explode(':', $cmd);
 
@@ -90,6 +99,9 @@ class Kernel
             return $this->help();
         }
 
+        // Filters all characters after the first space
+        $args = explode(' ', $args)[0];
+
         // Check if the arguments are valid
         if ($args) {
             $args = explode(',', $args);
@@ -102,12 +114,12 @@ class Kernel
             }
         }
 
-        $this->runCommand($command, $args);
+        $this->runCommand($command, $args, $options);
 
         return 'Exiting...';
     }
 
-    private function runCommand($command, $args)
+    private function runCommand($command, $args, $options = null)
     {
         // Check if a function exists for the command
         $function = $command . '_' . $args[0] ?? null;
@@ -122,7 +134,7 @@ class Kernel
             if (class_exists($this->commandsRoot . $class)) {
                 $class = $this->commandsRoot . $class;
                 $class = new $class;
-                return $class->handle();
+                return $class->handle($options);
             } 
         }
 

@@ -61,6 +61,23 @@ class Model
         return $result ? $result[0] : false;
     }
 
+    public static function has_any()
+    {
+        if (!self::connect()) {
+            return false;
+        }
+
+        $table = self::getTable();
+
+        // Gets the count of the table
+        $query = "SELECT COUNT(*) FROM $table";
+
+        // Execute the query
+        $result = DB::select($query);
+
+        return $result ? $result[0]['COUNT(*)'] > 0 : false;
+    }
+
     public static function find($param)
     {
         if (!self::connect()) {
