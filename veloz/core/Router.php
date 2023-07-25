@@ -138,6 +138,34 @@ class Router
         }
     }
 
+    public function set_global_middleware($middleware = null, $method = null, $exclude = null)
+    {
+        if ($exclude) {
+            $uri = $_SERVER['REQUEST_URI'];
+
+            foreach ($exclude as $key => $value) {
+                if ($uri === $value) {
+                    return;
+                }
+            }
+        }
+
+        $middlewareName = $middleware;
+        $middlewareMethod = $method ?? $this->defaultMiddlewareMethod;
+
+        if (!in_array($middlewareName, array_keys($this->middleware))) {
+            throw new \Exception('Middleware "'.$middlewareName.'" not found. Check the middleware name in the respective class.');
+        }
+
+        foreach ($this->middleware[$middlewareName]['methods'] as $method => $callback) {
+            // Checks if the middlewareMethod matches any of the methods in the middleware class
+            if ($middlewareMethod === $method) {
+                // Executes callback
+                $callback();
+            }
+        }
+    }
+
     public function match(string $method, string $uri): string|array|bool|null
     {
         foreach ($this->routes as $route) {
