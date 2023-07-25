@@ -2,7 +2,7 @@
 
 namespace Veloz\Helpers;
 
-use App\models\User;
+use Veloz\Models\User;
 use Defuse\Crypto\Crypto;
 use Defuse\Crypto\Exception\BadFormatException;
 use Defuse\Crypto\Exception\EnvironmentIsBrokenException;
@@ -22,16 +22,16 @@ class Auth
     public static function check(): bool
     {
         // First we check if the session_id is in the session
-        if (!isset($_SESSION['veloz-dashboard']['user']['sessionId'])) {
+        if (!isset($_SESSION[$_ENV['APP_NAME']]['user']['sessionId'])) {
             return false;
         }
 
         // Now we check if the session exists in the database
-        if (!Session::exists(['user_id' => Auth::id(), 'session_id' => $_SESSION['veloz-dashboard']['user']['sessionId']])) {
+        if (!Session::exists(['user_id' => Auth::id(), 'session_id' => $_SESSION[$_ENV['APP_NAME']]['user']['sessionId']])) {
             return false;
         }
 
-        if (!isset($_SESSION['veloz-dashboard']['user']) && !self::user()) {
+        if (!isset($_SESSION[$_ENV['APP_NAME']]['user']) && !self::user()) {
             return false;
         }
 
@@ -79,10 +79,10 @@ class Auth
     public static function set($user): void
     {
         veloz_session_set('user', [
-            'id' => $user['id'] ?? $_SESSION['veloz-dashboard']['user']['id'] ?? '',
+            'id' => $user['id'] ?? $_SESSION[$_ENV['APP_NAME']]['user']['id'] ?? '',
             'name' => $user['name'] ?? "",
-            'sessionId' => $user['sessionId'] ?? $_SESSION['veloz-dashboard']['user']['sessionId'] ?? '',
-            'role_id' => $user['role_id'] ?? $_SESSION['veloz-dashboard']['user']['role_id'] ?? '',
+            'sessionId' => $user['sessionId'] ?? $_SESSION[$_ENV['APP_NAME']]['user']['sessionId'] ?? '',
+            'role_id' => $user['role_id'] ?? $_SESSION[$_ENV['APP_NAME']]['user']['role_id'] ?? '',
         ]);
     }
 
@@ -106,6 +106,7 @@ class Auth
      */
     public static function try_login($credentials, $remember): bool
     {
+        // Check if the user exists
         $user = User::exists(['email' => $credentials['email']]);
 
         if ($user) {
@@ -130,7 +131,7 @@ class Auth
                 $user['sessionId'] = $sessionId;
                 Session::store($user['id'], $sessionId);
                 self::set($user);
-                unset ($_SESSION['veloz-dashboard']['email']);
+                unset ($_SESSION[$_ENV['APP_NAME']]['email']);
                 return true;
             }
         }

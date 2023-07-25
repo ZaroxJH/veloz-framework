@@ -2,7 +2,7 @@
 
 use Veloz\Core\View;
 use Veloz\Models\Log;
-use JetBrains\PhpStorm\NoReturn;
+use Veloz\Helpers\Auth;
 // use Veloz\Helpers\Auth;
 use Veloz\Core\Exception as HomeException;
 
@@ -213,12 +213,21 @@ if (! function_exists('validate_post')) {
             return false;
         }
 
+        if (Auth::check()) {
+            // Check if the CSRF token is valid
+            if (!check_csrf()) {
+                set_exception('Oops something went wrong', 'error');
+                return false;
+            }
+        }
+
         // Validate the data from the request
         foreach ($rules as $key => $value) {
+            $uri = $_SERVER['REQUEST_URI'] ?? '/';
             $rules = explode('|', $value);
             foreach ($rules as $rule) {
                 if (!isset($_POST[$key])) {
-                    set_exception('Nice try!', 'error');
+                    process_response('Nice try!', 'error', $uri);
                     return false;
                 }
 
@@ -227,33 +236,41 @@ if (! function_exists('validate_post')) {
                     $rule = explode(':', $rule);
 
                     // Check if the rule is valid
-                    if (!in_array($rule[0], ['min', 'max', 'length'])) {
+                    if (!in_array($rule[0], ['min', 'max', 'length', 'in'])) {
                         throw new Exception('Invalid validation rule: ' . $rule[0]);
                     }
 
                     if ($rule[0] === 'min' && strlen($_POST[$key]) < $rule[1]) {
-                        set_exception('Oops something went wrong', 'error');
+                        process_response('Oops something went wrong', 'error', $uri);
                         return false;
                     }
 
                     if ($rule[0] === 'max' && strlen($_POST[$key]) > $rule[1]) {
-                        set_exception('Oops something went wrong', 'error');
+                        process_response('Oops something went wrong', 'error', $uri);
                         return false;
+                    }
+
+                    if ($rule[0] === 'in') {
+                        $acceptedValues = explode(',', $rule[1]);
+                        if (!exists_in_array($_POST[$key], $acceptedValues)) {
+                            process_response('Oops something went wrong', 'error', $uri);
+                            return false;
+                        }
                     }
                 }
                 if ($rule === 'required' && empty($_POST[$key])) {
-                    set_exception('Oops something went wrong (You might want to listen to your browser)', 'error');
+                    process_response('Oops something went wrong (You might want to listen to your browser)', 'error', $uri);
                     return false;
                 }
                 if ($rule === 'numeric' && !is_numeric($_POST[$key])) {
-                    set_exception('Oops something went wrong', 'error');
+                    process_response('Oops something went wrong', 'error', $uri);
                     return false;
                 } else {
                     // Checks for comma's and replaces them with dots
                     $_POST[$key] = str_replace(',', '.', $_POST[$key]);
                 }
                 if ($rule === 'email' && !filter_var($_POST[$key], FILTER_VALIDATE_EMAIL)) {
-                    set_exception('Oops something went wrong', 'error');
+                    process_response('Oops something went wrong', 'error', $uri);
                     return false;
                 }
             }
@@ -323,6 +340,13 @@ if (! function_exists('log_action')) {
         $log->userAgent = $server['HTTP_USER_AGENT'] ?? 'Unkown';
         $log->requestedPage = $server['REQUEST_URI'] ?? null;
         $log->requestMethod = $server['REQUEST_METHOD'] ?? null;
+        if (is_array($payload)) {
+            foreach ($payload as $key => $value) {
+                if (str_contains($key, 'pass')) {
+                    $payload[$key] = '***';
+                }
+            }
+        }
         $log->payload = $payload;
         $log->ipAddress = $server['REMOTE_ADDR'] ?? null;
         $log->statusCode = http_response_code() ?? $server['REDIRECT_STATUS'] ?? null;
@@ -583,6 +607,19 @@ if (! function_exists('format_datetime')) {
 
         // Formats the given datetime to the given format
         return date($format, strtotime($param));
+    }
+}
+
+if (! function_exists('time_in_seconds')) {
+    /**
+     * Calculates the time in seconds from a given start and end time.
+     *
+     * @param $time
+     * @return false|int
+     */
+    function time_in_seconds($start, $end)
+    {
+        return round((strtotime($end) - strtotime($start)), 2);
     }
 }
 
