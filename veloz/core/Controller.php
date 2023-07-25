@@ -31,8 +31,13 @@ class Controller extends View
             }
         }
 
+        $layoutFile = 'app.php';
+
         if ($includeLayout) {
-            $layout = $root . $_ENV['APP_ROOT'] . 'views/layouts/app.php';
+            if (is_string($includeLayout)) {
+                $layoutFile = $includeLayout;
+            }
+            $layout = $root . $_ENV['APP_ROOT'] . 'views/layouts/' . $layoutFile;
         }
 
         return $this->include($path, $view, $layout, $data);
@@ -88,8 +93,16 @@ class Controller extends View
             }
         }
 
+        $layoutFile = 'app.php';
+
         if ($includeLayout) {
-            $layout = $root . $_ENV['C_ROOT'] . 'views/layouts/app.php';
+            if (is_string($includeLayout)) {
+                if (!str_ends_with($includeLayout, '.php')) {
+                    $includeLayout .= '.php';
+                }
+                $layoutFile = $includeLayout;
+            }
+            $layout = $root . $_ENV['C_ROOT'] . 'views/layouts/' . $layoutFile;
         }
 
         $this->set_new_path($ori_path);
