@@ -1,3 +1,3 @@
 <?php
 
-DEFINE ('vf_version', '1.5.5');
+DEFINE ('vf_version', '1.5.6');

@@ -41,7 +41,7 @@ class View
 
         // Throw an exception when the view is not found
         if (!is_file($this->viewPath . '/' . $view . '.php')) {
-            throw new \Exception('View not found');
+            throw new \Exception('View ' . $view . ' not found');
         }
 
         // Start output buffering
