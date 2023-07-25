@@ -20,6 +20,26 @@ class RunMigrations
     {
         echoOutput('Running migrations...', 1);
 
+        echoOutput('Do you want to run the migrations from a custom folder? (y/n)', 1);
+        $custom = readline('Custom folder? ');
+
+        if ($custom == 'y') {
+            echoOutput('Enter the path where the database/migrations folder is: ', 1);
+            $path = readline('Path: ');
+            if (!str_ends_with($path, '/')) {
+                $path .= '/';
+            }
+            $path = $this->root . $path;
+
+            if (!file_exists($path)) {
+                echoOutput('Path does not exist.', 0, 1);
+                sleep(2);
+                return $this->help();
+            }
+
+            $this->root = $path;
+        }
+
         // Runs the migrations from the root/database/migrations folder
         $migrations = glob($this->root . 'database/migrations/*.php');
 
