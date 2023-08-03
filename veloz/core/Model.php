@@ -29,6 +29,20 @@ class Model
         return false;
     }
 
+    public static function get_all()
+    {
+        if (!self::connect()) {
+            return false;
+        }
+
+        $table = self::getTable();
+        $select = self::assignSelect($table);
+
+        $query = "SELECT $select FROM $table";
+
+        return DB::select($query);
+    }
+
     /**
      * Checks if anything is set in the database.
      */
