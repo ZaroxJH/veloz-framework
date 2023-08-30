@@ -43,6 +43,30 @@ class Model
         return DB::select($query);
     }
 
+    public static function get_by_ids($ids)
+    {
+        if (!self::connect()) {
+            return false;
+        }
+
+        $table = self::getTable();
+        $select = self::assignSelect($table);
+
+        $ids = implode(', ', $ids);
+
+        $query = "SELECT $select FROM $table WHERE id IN ($ids)";
+
+        $result = DB::select($query);
+
+        $return = [];
+
+        foreach ($result as $item) {
+            $return[$item['id']] = $item;
+        }
+
+        return $return;
+    }
+
     /**
      * Checks if anything is set in the database.
      */

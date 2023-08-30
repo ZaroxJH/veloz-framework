@@ -204,9 +204,9 @@ if (! function_exists('validate_post')) {
         }
 
         // Check if the request content type is application/x-www-form-urlencoded
-        if (isset($_SERVER['CONTENT_TYPE']) && $_SERVER['CONTENT_TYPE'] !== 'application/x-www-form-urlencoded') {
-            return false;
-        }
+        // if (isset($_SERVER['CONTENT_TYPE']) && $_SERVER['CONTENT_TYPE'] !== 'application/x-www-form-urlencoded') {
+        //     return false;
+        // }
 
         // Check if the request body is not empty
         if (empty($_POST)) {
@@ -387,7 +387,7 @@ if (! function_exists('set_headers')) {
         header('Referrer-Policy: no-referrer');
         header('Content-Security-Policy: default-src \'self\'; script-src \'self\' \'unsafe-inline\' \'unsafe-eval\' https://www.google.com/recaptcha/ https://www.gstatic.com/recaptcha/; style-src \'self\' \'unsafe-inline\' https://fonts.googleapis.com/; img-src \'self\' data: https://www.google.com/recaptcha/ https://www.gstatic.com/recaptcha/; font-src \'self\' https://fonts.gstatic.com/; frame-src https://www.google.com/recaptcha/; object-src \'none\';');
         header('X-Powered-By: Canvas-IT');
-        header('Server: Basement');
+        // header('Server: Basement');
     }
 }
 
