@@ -142,11 +142,29 @@ class Model
         $result = DB::select($query, $param);
 
         if ($result) {
-            $result = $result[0] ?? $result;
             return (object) $result;
         }
 
         return false;
+    }
+
+    /**
+     * Handles pagination
+     */
+    public static function paginate($perPage, $page = 1)
+    {
+        if (!self::connect()) {
+            return false;
+        }
+
+        $table = self::getTable();
+        $select = self::assignSelect($table);
+
+        $offset = ($page - 1) * $perPage;
+
+        $query = "SELECT $select FROM $table LIMIT $perPage OFFSET $offset";
+
+        return DB::select($query);
     }
 
     /**

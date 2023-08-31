@@ -10,6 +10,7 @@ class Router
     public array $action;
     private string $path;
     public string|null $defaultMiddlewareMethod;
+    public bool $allowQueryParams = true;
     
     protected array $routes = [];
     protected array $groupIdentifier = [];
@@ -169,9 +170,17 @@ class Router
     public function match(string $method, string $uri): string|array|bool|null
     {
         foreach ($this->routes as $route) {
+
             if (!$route['allowAll']) {
                 if ($route['method'] === $method && preg_match($route['pattern'], $uri, $matches)) {
                     return $this->handleLoad($route, $method, $uri, $matches);
+                }
+
+                // Check if query parameters are allowed and handle query parameters
+                if ($this->allowQueryParams && parse_url($uri, PHP_URL_QUERY)) {
+                    if (preg_match($route['pattern'], parse_url($uri, PHP_URL_PATH), $matches)) {
+                        return $this->handleLoad($route, $method, $uri, $matches);
+                    }
                 }
 
                 if ($this->numeric) {

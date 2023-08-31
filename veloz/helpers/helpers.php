@@ -280,6 +280,67 @@ if (! function_exists('validate_post')) {
     }
 }
 
+if (! function_exists('validate_get')) {
+    function validate_get(array $rules)
+    {
+        if ($_SERVER['REQUEST_METHOD'] !== 'GET') {
+            return false;
+        }
+
+        if (empty($_GET)) {
+            return false;
+        }
+
+        foreach ($rules as $key => $value) {
+            $rules = explode('|', $value);
+            foreach ($rules as $rule) {
+                if (!isset($_GET[$key])) {
+                    return false;
+                }
+
+                if (str_contains($rule, ':')) {
+                    // This means we have something like max:20
+                    $rule = explode(':', $rule);
+
+                    // Check if the rule is valid
+                    if (!in_array($rule[0], ['min', 'max', 'length', 'in'])) {
+                        throw new Exception('Invalid validation rule: ' . $rule[0]);
+                    }
+
+                    if ($rule[0] === 'min' && strlen($_GET[$key]) < $rule[1]) {
+                        return false;
+                    }
+
+                    if ($rule[0] === 'max' && strlen($_GET[$key]) > $rule[1]) {
+                        return false;
+                    }
+
+                    if ($rule[0] === 'in') {
+                        $acceptedValues = explode(',', $rule[1]);
+                        if (!exists_in_array($_GET[$key], $acceptedValues)) {
+                            return false;
+                        }
+                    }
+                }
+                if ($rule === 'required' && empty($_GET[$key])) {
+                    return false;
+                }
+                if ($rule === 'numeric' && !is_numeric($_GET[$key])) {
+                    return false;
+                } else {
+                    // Checks for comma's and replaces them with dots
+                    $_GET[$key] = str_replace(',', '.', $_GET[$key]);
+                }
+                if ($rule === 'email' && !filter_var($_GET[$key], FILTER_VALIDATE_EMAIL)) {
+                    return false;
+                }
+            }
+        }
+
+        return true;
+    }
+}
+
 if (! function_exists('validate_request')) {
     /**
      * Validates the given request data.
