@@ -29,6 +29,55 @@ class Model
         return false;
     }
 
+    public static function create($params)
+    {
+        if (!self::connect()) {
+            return false;
+        }
+
+        $table = self::getTable();
+
+        // Gets fillables variable from the model
+        $fillable = (new static)->fillable;
+        
+        // Checks if the fillable variable is set
+        if (!isset($fillable)) {
+            throw new \Exception('Fillable variable is not set in the model');
+        }
+
+        // Checks if the fillable variable is an array
+        if (!is_array($fillable)) {
+            throw new \Exception('Fillable variable is not an array');
+        }
+
+        // Checks if the fillable variable is empty
+        if (empty($fillable)) {
+            throw new \Exception('Fillable variable is empty');
+        }
+
+        // Checks if the params variable is an array
+        if (!is_array($params)) {
+            throw new \Exception('Params variable is not an array');
+        }
+
+        // Checks if the keys from the params array match the fillable variable
+        foreach ($params as $key => $value) {
+            if (!in_array($key, $fillable)) {
+                throw new \Exception('Key ' . $key . ' is not in the fillable variable');
+            }
+        }
+
+        // Inserts the data into the database
+        $id = self::insert($params);
+
+        // If the insert was successful, return the id
+        if ($id) {
+            return $id;
+        }
+
+        return false;
+    }
+
     public static function get_all()
     {
         if (!self::connect()) {
@@ -151,22 +200,50 @@ class Model
     /**
      * Handles pagination
      */
-    public static function paginate($perPage, $page = 1)
+    public static function paginate($perPage)
     {
         if (!self::connect()) {
             return false;
         }
-
+    
         $table = self::getTable();
         $select = self::assignSelect($table);
-
+    
+        $page = 1;
+    
+        $validate = validate_get([
+            'page' => 'numeric'
+        ]);
+    
+        if ($validate) {
+            $page = $_GET['page'];
+        }
+    
         $offset = ($page - 1) * $perPage;
+    
+        $countQuery = "SELECT COUNT(*) as total FROM $table";
+        $countResult = DB::select($countQuery);
 
+        if (is_array($countResult)) {
+            $totalCount = $countResult[0]['total'];
+        } else {
+            $totalCount = $countResult->total;
+        }
+    
         $query = "SELECT $select FROM $table LIMIT $perPage OFFSET $offset";
+    
+        $paginationData = [
+            'total' => $totalCount,
+            'per_page' => $perPage,
+            'current_page' => $page,
+            'page_amount' => ceil($totalCount / $perPage),
+        ];
 
+        set_pagination_data($paginationData);
+    
         return DB::select($query);
     }
-
+        
     /**
      * Gets all the rows from the table.
      *

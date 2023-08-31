@@ -183,6 +183,13 @@ class Router
                     }
                 }
 
+                $uri = rtrim($uri, '/');
+                $lastChar = substr($uri, -1);
+
+                if (is_numeric($lastChar)) {
+                    $this->numeric = $lastChar;
+                }
+
                 if ($this->numeric) {
                     if (str_contains($route['filtered'], '{slug}')) {
 
@@ -199,13 +206,6 @@ class Router
                         }
                     }
                     continue;
-                }
-
-                $uri = rtrim($uri, '/');
-                $lastChar = substr($uri, -1);
-
-                if (is_numeric($lastChar)) {
-                    $this->numeric = $lastChar;
                 }
             } else {
                 if (preg_match($route['pattern'], $uri, $matches)) {

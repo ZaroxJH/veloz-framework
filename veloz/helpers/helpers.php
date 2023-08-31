@@ -3,18 +3,17 @@
 use Veloz\Core\View;
 use Veloz\Models\Log;
 use Veloz\Helpers\Auth;
-// use Veloz\Helpers\Auth;
 use Veloz\Core\Exception as HomeException;
 
-// if (! function_exists('auth')) {
-//     /**
-//      * @return Auth
-//      */
-//     function auth(): Auth
-//     {
-//         return new Auth();
-//     }
-// }
+if (! function_exists('auth')) {
+    /**
+     * @return Auth
+     */
+    function auth(): Auth
+    {
+        return new Auth();
+    }
+}
 
 if (! function_exists('assets')) {
     /**
@@ -366,6 +365,95 @@ if (! function_exists('validate_request')) {
         }
 
         return true;
+    }
+}
+
+if (! function_exists('set_pagination_data')) {
+    /**
+     * Sets the pagination data.
+     */
+    function set_pagination_data($data): void
+    {
+        $_SESSION[$_ENV['APP_NAME']]['pagination'] = $data;
+    }
+}
+
+if (! function_exists('pagination')) {
+    /**
+     * Gets the pagination data.
+     */
+    function pagination($type, $raw = true)
+    {
+        $acceptedTypes = [
+            'buttons',
+            'current_page',
+            'total_pages',
+            'page_from_total',
+            'total_items',
+        ];
+
+        if (is_array($type)) {
+            $params = $type['params'] ?? null;
+            $type = $type['type'] ?? null;
+        }
+
+        if (!in_array($type, $acceptedTypes)) {
+            return false;
+        }
+
+        if (!isset($_SESSION[$_ENV['APP_NAME']]['pagination'])) {
+            return false;
+        }
+
+        $data = $_SESSION[$_ENV['APP_NAME']]['pagination'];
+
+        switch($type) {
+            case 'buttons':
+                // Creates the pagination buttons
+                // Example 1,2,3,4 then last button 10, depending on $params['amount']
+                $buttons = '';
+
+                // Checks if the current page is not the first page
+                if ($data['current_page'] > 1) {
+                    $buttons .= '<a href="?page=' . ($data['current_page'] - 1) . '" class="previous-page">Previous</a>';
+                }
+
+                // Generate numeric buttons based on $params['amount']
+                for ($i = max(1, $data['current_page'] - floor($params['amount'] / 2)); $i <= min($data['page_amount'], $data['current_page'] + floor($params['amount'] / 2)); $i++) {
+                    if ($i == $data['current_page']) {
+                        $buttons .= '<span class="current">' . $i . '</span>';
+                    } else {
+                        $buttons .= '<a href="?page=' . $i . '">' . $i . '</a>';
+                    }
+                }
+
+                // Checks if the current page is not the last page
+                if ($data['current_page'] < $data['page_amount']) {
+                    $buttons .= '<a href="?page=' . ($data['current_page'] + 1) . '" class="next-page">Next</a>';
+                }
+
+                return $buttons;
+                break;
+            case 'current_page':
+                return $data['current_page'];
+                break;
+            case 'total_pages':
+                return $data['page_amount'];
+                break;
+            case 'page_from_total':
+                if ($raw) {
+                    return 'Showing page ' . $data['current_page'] . ' of ' . $data['page_amount'];
+                }
+                // Returns data with html markup
+                return '<p class="pagination-page-from-total">Showing page ' . $data['current_page'] . ' of ' . $data['page_amount'] . '</p>';
+                break;
+            case 'total_items':
+                return $data['total'];
+                break;
+            default:
+                return false;
+                break;
+        }
     }
 }
 
