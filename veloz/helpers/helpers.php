@@ -517,10 +517,10 @@ if (! function_exists('log_action')) {
 if (! function_exists('setup_server')) {
     function setup_server()
     {
-        ini_set( 'session.cookie_httponly', 1 );
-        ini_set( 'session.cookie_secure', 1 );
-        ini_set( 'expose_php', 0 );
-        set_headers();
+        // ini_set( 'session.cookie_httponly', 1 );
+        // ini_set( 'session.cookie_secure', 1 );
+        // ini_set( 'expose_php', 0 );
+        // set_headers();
         // session_name('Veloz');
         session_start();
     }

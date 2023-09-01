@@ -184,7 +184,14 @@ class Router
                 }
 
                 $uri = rtrim($uri, '/');
-                $lastChar = substr($uri, -1);
+
+                // Checks if there were query parameters
+                if (parse_url($uri, PHP_URL_QUERY)) {
+                    // Removes the query parameters
+                    $uri = parse_url($uri, PHP_URL_PATH);
+                }
+
+                $lastChar = substr($uri, -1);  
 
                 if (is_numeric($lastChar)) {
                     $this->numeric = $lastChar;
