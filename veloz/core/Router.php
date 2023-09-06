@@ -199,14 +199,19 @@ class Router
 
                 if ($this->numeric) {
                     if (str_contains($route['filtered'], '{slug}')) {
-
-                        $uri = substr($uri, 0, strrpos($uri, '/'));
+                
+                        $lastSlashPos = strrpos($uri, '/');
+                        
+                        if ($lastSlashPos !== false) {
+                            $uri = substr($uri, 0, $lastSlashPos);
+                        }
+                
                         $filtered = str_replace('/{slug}', '', $route['filtered']);
-
+                
                         if (str_contains($uri, $_ENV['APP_NAME'])) {
                             $uri = str_replace('/' . $_ENV['APP_NAME'], '', $uri);
                         }
-
+                
                         // If uri and filtered are the same, then we have a match
                         if ($uri === $filtered) {
                             return $this->handleLoad($route, $method, $uri, [$this->numeric]);

@@ -189,6 +189,170 @@ if (! function_exists('set_exception')) {
     }
 }
 
+if (! function_exists('t')) {
+    /**
+     * Translates the given string.
+     * 
+     * @param string $string
+     * @param string $file
+     * @param bool $admin
+     * @return string
+     */
+    function t(string $string, string $file = '', bool $admin = false): string
+    {
+        $fromRoot = '';
+    
+        if ($admin) {
+            // Sets lang from site_settings
+        } else {
+            // Sets lang to cookie preference
+            $lang = $_COOKIE['lang'] ?? 'en';
+            $fromRoot = $_ENV['APP_ROOT'] ?? '';
+        }
+    
+        // If the file is empty, we simply return the string
+        if (empty($file)) {
+            return $string;
+        }
+    
+        if (!str_ends_with($file, '.mo')) {
+            $file .= '.mo';
+        }
+    
+        $location = server_root() . $fromRoot . 'resources/lang/' . $lang . '/' . $file;
+    
+        // If the file is not empty, we check if the file exists
+        if (!file_exists($location)) {
+            // Log an error message or return the original string
+            return $string;
+        }
+
+        $file = str_replace('.mo', '', $file);
+    
+        if (function_exists('gettext')) {
+            setlocale(LC_ALL, 'nl_NL');
+    
+            // Specifies the location of the translation tables
+            bindtextdomain($file, server_root() . $fromRoot . 'resources/lang/' . $lang . '/');
+            bind_textdomain_codeset($file, 'UTF-8');
+    
+            // Sets the default domain to $file
+            textdomain($file);
+    
+            // Attempt to translate the string
+            $translation = gettext($string);
+    
+            if ($translation === $string) {
+                // Translation failed, return the original string
+                return $string;
+            }
+    
+            // Return the translated string or the original string
+            return $translation;
+        } else {
+            // gettext is not available, return the original string
+            return $string;
+        }
+    }
+}
+
+if (! function_exists('scrape_translatables')) {
+    /**
+     * Scrapes and collects all translatable strings from the given directory.
+     * 
+     * @param string $dir
+     * @return array|bool
+     */
+    function scrape_translatables(string $dir)
+    {
+        if (empty($dir)) {
+            return false;
+        }
+
+        $files = scandir($dir);
+        $translatables = [];
+
+        foreach ($files as $file) {
+            if ($file === '.' || $file === '..') {
+                continue;
+            }
+
+            if (is_dir($dir . '/' . $file)) {
+                $translatables = array_merge($translatables, scrape_translatables($dir . '/' . $file));
+            } else {
+                $fileContent = file_get_contents($dir . '/' . $file);
+                // Example call to t() function: t('Hello World', 'default')
+                // We only want to get the first parameter, so we look got t(' and then get the string until the next ')
+                $matches = [];
+                preg_match_all('/t\(\'(.*?)\'/', $fileContent, $matches);
+                if (!empty($matches[1])) {
+                    $translatables = array_merge($translatables, $matches[1]);
+                }
+            }
+        }
+
+        return $translatables;
+    }
+
+}
+
+if (! function_exists('create_po_file')) {
+    /**
+     * Generate the PO file based on the given information
+     * 
+     * @param array $translatables
+     * @param string $location
+     * @param string $fileName
+     * @return bool
+     */
+    function create_po_file(array $translatables, string $location, string $fileName): bool
+    {
+        // Check if $translatables is not empty
+        if (empty($translatables)) {
+            return false;
+        }
+
+        if (!str_ends_with($fileName, '.po')) {
+            $fileName .= '.po';
+        }
+    
+        // Create the full file path
+        $filePath = rtrim($location, '/') . '/' . $fileName;
+
+        // Creates the file if it doesn't exist
+        // if (!file_exists($filePath)) {
+        //     fopen($filePath, 'w');
+        // }
+    
+        // Open the PO file for writing
+        $fileHandle = fopen($filePath, 'w');
+    
+        if (!$fileHandle) {
+            return false; // Unable to open the file
+        }
+    
+        // Write the PO header
+        $header = 'msgid "" ' . PHP_EOL . 'msgstr ""' . PHP_EOL . '"Content-Type: text/plain; charset=UTF-8\n"' . PHP_EOL . '"Language: nl_NL\n"' . PHP_EOL . PHP_EOL . '';
+    
+        fwrite($fileHandle, $header);
+    
+        // Write translations for each translatable item
+        foreach ($translatables as $msgid) {
+            // Escape double quotes and backslashes in msgid
+            $msgid = str_replace('"', '\\"', $msgid);
+
+            // Write msgid with an empty msgstr
+            fwrite($fileHandle, "msgid \"$msgid\"\n");
+            fwrite($fileHandle, "msgstr \"\"\n\n");
+        }
+    
+        // Close the file handle
+        fclose($fileHandle);
+    
+        return true; // PO file created successfully
+    }
+}
+
 if (! function_exists('validate_post')) {
     /**
      * Validates the given POST data.
@@ -517,10 +681,10 @@ if (! function_exists('log_action')) {
 if (! function_exists('setup_server')) {
     function setup_server()
     {
-        // ini_set( 'session.cookie_httponly', 1 );
-        // ini_set( 'session.cookie_secure', 1 );
-        // ini_set( 'expose_php', 0 );
-        // set_headers();
+        ini_set( 'session.cookie_httponly', 1 );
+        ini_set( 'session.cookie_secure', 1 );
+        ini_set( 'expose_php', 0 );
+        set_headers();
         // session_name('Veloz');
         session_start();
     }
@@ -742,15 +906,18 @@ if (! function_exists('format_datetime')) {
             if (!$keys) {
                 return false;
             }
+
             if (!is_array($keys)) {
                 $keys = [$keys];
             }
+
             // Formats all given keys in the array to the given format
             foreach ($param as $key => &$value) {
                 foreach ($keys as $val) {
                     $value[$val] = date($format, strtotime($value[$val]));
                 }
             }
+            
             return $param;
         }
 
