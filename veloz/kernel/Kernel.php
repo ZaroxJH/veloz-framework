@@ -22,6 +22,9 @@ class Kernel
             'seeders',
             'seeder',
         ],
+        'update' => [
+            'modules',
+        ],
         'help',
     ];
 

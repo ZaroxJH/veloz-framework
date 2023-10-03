@@ -131,4 +131,13 @@ class Request
     {
         return self::$error;
     }
+
+    public static function json_response(array|null $data = []): bool|string
+    {
+        $data = $data ?? [];
+
+        header('Content-Type: application/json');
+        echo json_encode($data);
+        exit();
+    }
 }

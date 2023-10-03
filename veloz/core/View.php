@@ -4,6 +4,7 @@ namespace Veloz\Core;
 
 use DOMDocument;
 use DOMXPath;
+use Veloz\Core\ModuleLoader;
 
 class View
 {
@@ -85,6 +86,14 @@ class View
 
             $content = ob_get_clean();
         }
+
+        if ($_ENV['MODULES'] === 'true') {
+            $modules = ModuleLoader::load_js();
+            $content .= $modules;   
+        }
+
+        // Adds the closing tags for the body and html tags
+        $content .= '</body></html>';
 
         if (class_exists('tidy')) {
             $tidy = new \tidy();
