@@ -532,6 +532,16 @@ if (! function_exists('validate_request')) {
     }
 }
 
+if (! function_exists('random_sleep')) {
+    /**
+     * Sleeps for a random amount of time between 0.1 and 0.5 seconds.
+     */
+    function random_sleep(): void
+    {
+        usleep(rand(100000, 500000));
+    }
+}
+
 if (! function_exists('set_pagination_data')) {
     /**
      * Sets the pagination data.
@@ -681,10 +691,10 @@ if (! function_exists('log_action')) {
 if (! function_exists('setup_server')) {
     function setup_server()
     {
-        ini_set( 'session.cookie_httponly', 1 );
-        ini_set( 'session.cookie_secure', 1 );
-        ini_set( 'expose_php', 0 );
-        set_headers();
+        // ini_set( 'session.cookie_httponly', 1 );
+        // ini_set( 'session.cookie_secure', 1 );
+        // ini_set( 'expose_php', 0 );
+        // set_headers();
         // session_name('Veloz');
         session_start();
     }
@@ -879,7 +889,6 @@ if (! function_exists('process_response')) {
         redirect($page);
     }
 }
-
 
 if (! function_exists('server_root')) {
     /**
