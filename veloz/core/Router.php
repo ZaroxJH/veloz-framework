@@ -82,6 +82,10 @@ class Router
         return $this;
     }
 
+    public function getRoutes() {
+        return $this->routes;
+    }
+
     public function allowAll($path, $realpath, $subdomain, $middleware = null) {
         $this->add('GET', $path, null, true, $realpath, $subdomain)->middleware($middleware);
     }
@@ -279,13 +283,24 @@ class Router
         ];
     }
 
-    public function dispatch(string $method, string $uri): string|bool
+    public function dispatch(string $method, string $uri, bool $caching = false): string|bool
     {
         // // Checks if a subdomain was requested
         // if ($_SERVER['HTTP_HOST'] != $this->appUrl) {
         //     // Requested subdomain was not registered
         //     return $this->set404();
         // }
+
+        if ($caching) {
+            $uri_hash = md5($uri);
+            $cache_path = server_root() . $_ENV['APP_ROOT'] . '/resources/cache/pages/';
+            $cache_file = $cache_path . $uri_hash . '.html';
+
+            if (file_exists($cache_file)) {
+                $html = file_get_contents($cache_file);
+                return $html;
+            }
+        }
 
         $match = $this->match($method, $uri);
 

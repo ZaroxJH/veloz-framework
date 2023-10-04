@@ -10,6 +10,7 @@ class Kernel
     private array $validCommands = [
         'generate' => [
             'admin_key',
+            'cache_pages',
         ],
         'create' => [
             'migration',
