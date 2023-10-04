@@ -56,7 +56,9 @@ class Core
     public static function get_bind_data_json(): string
     {
         self::sanitize_data();
-        return Request::json_response($_SESSION['bind_data']);
+        $data = $_SESSION['bind_data'] ?? [];
+        $_SESSION['bind_data'] = [];
+        return Request::json_response($data);
         // return Request::json_response(self::$bind_data);
     }
 
