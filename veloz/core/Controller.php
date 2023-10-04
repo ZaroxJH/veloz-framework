@@ -4,6 +4,13 @@ namespace Veloz\Core;
 
 class Controller extends View
 {
+    protected $customClass;
+
+    protected function set_custom_class(string $class): void
+    {
+        $this->customClass = explode('\\', $class);
+    }
+
     protected function view(string $view, array $data = [], $includeLayout = true): string|bool
     {
         $layout = null;
@@ -20,7 +27,7 @@ class Controller extends View
             $path = substr($path, 0, -1);
         }
 
-        $class = explode('\\', get_called_class());
+        $class = $this->customClass ?? explode('\\', get_called_class());
 
         if (isset($class[0])) {
             if ($class[0] !== 'App') {

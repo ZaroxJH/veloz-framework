@@ -19,6 +19,10 @@ class Request
             'method',
         ];
 
+        if (!isset($request_data['data'])) {
+            $request_data['data'] = [];
+        }
+
         $allowed_methods = [
             'GET',
             'POST',
@@ -49,7 +53,9 @@ class Request
 
         switch ($request_data['method']) {
             case 'GET':
-                $request_data['url'] .= '?' . http_build_query($request_data['data']);
+                if (!empty($request_data['data'])) {
+                    $request_data['url'] .= '?' . http_build_query($request_data['data']);
+                }
                 break;
             case 'POST':
                 $request_data['data'] = http_build_query($request_data['data']);
@@ -60,6 +66,12 @@ class Request
 
         curl_setopt($curl, CURLOPT_RETURNTRANSFER, true);
         curl_setopt($curl, CURLOPT_CUSTOMREQUEST, $request_data['method']);
+
+        // if (isset($request_data['headers'])) {
+        //     curl_setopt($curl, CURLOPT_HTTPHEADER, $request_data['headers']);
+        // }
+
+        curl_setopt($curl, CURLOPT_HTTPHEADER, ['User-Agent: Veloz/Request']);
 
         if (isset($request_data['data'])) {
             curl_setopt($curl, CURLOPT_POSTFIELDS, $request_data['data']);
