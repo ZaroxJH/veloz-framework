@@ -376,13 +376,12 @@ if (! function_exists('validate_post')) {
             return false;
         }
 
-        if (Auth::check()) {
-            // Check if the CSRF token is valid
-            if (!check_csrf()) {
-                set_exception('Oops something went wrong', 'error');
-                return false;
-            }
-        }
+        // Check if the CSRF token is valid
+        if (!check_csrf()) {
+            // TODO: turn back on
+            // process_response('Oops something went wrong', 'error', $_SERVER['REQUEST_URI'] ?? '/');
+            // return false;
+        }        
 
         // Validate the data from the request
         foreach ($rules as $key => $value) {
@@ -583,6 +582,11 @@ if (! function_exists('pagination')) {
 
         switch($type) {
             case 'buttons':
+
+                if ($data['total'] <= $data['per_page']) {
+                    return false;
+                }
+
                 // Creates the pagination buttons
                 // Example 1,2,3,4 then last button 10, depending on $params['amount']
                 $buttons = '';
@@ -717,6 +721,8 @@ if (! function_exists('set_headers')) {
 if (! function_exists('veloz_error_handler')) {
     function veloz_error_handler($errno, $errstr, $errfile, $errline)
     {
+        $vx_version = vx_version;
+
         $html = <<<HTML
         <!DOCTYPE html>
         <html lang="en">
@@ -771,7 +777,7 @@ if (! function_exists('veloz_error_handler')) {
                     <p><strong>Error message:</strong> {$errstr}</p>
                     <p><strong>Error file:</strong> {$errfile}</p>
                     <p><strong>Error line:</strong> {$errline}</p>
-                    <p class="version">Veloz version: {vf_version}</p>
+                    <p class="version">Veloz version: $vx_version</p>
                 </div>
             </div>
         </body>
@@ -790,6 +796,7 @@ if (! function_exists('veloz_exception_handler')) {
         $errorFile = $e->getFile();
         $errorLine = $e->getLine();
         $stackTrace = $e->getTraceAsString();
+        $vx_version = vx_version;
 
         $html = <<<HTML
         <!DOCTYPE html>
@@ -863,7 +870,7 @@ if (! function_exists('veloz_exception_handler')) {
                     <div class="stack-trace-container">
                         <pre class="stack-trace">$stackTrace</pre>
                     </div>
-                    <p class="version">Veloz version: {vf_version}</p>
+                    <p class="version">Veloz version: $vx_version</p>
                 </div>
             </div>
         </body>

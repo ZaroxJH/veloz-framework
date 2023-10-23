@@ -198,7 +198,9 @@ class Router
                 $lastChar = substr($uri, -1);  
 
                 if (is_numeric($lastChar)) {
-                    $this->numeric = $lastChar;
+                    $lastSlash = strrpos($uri, '/');
+                    // TODO set to everything after last slash
+                    $this->numeric = substr($uri, $lastSlash + 1);
                 }
 
                 if ($this->numeric) {
