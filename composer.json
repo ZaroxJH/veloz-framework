@@ -18,7 +18,7 @@
       "veloz/helpers/helpers.php"
     ],
     "psr-4": {
-      "Veloz\\": "veloz"
+      "Veloz\\": "veloz/"
     }
   },
   "autoload-dev": {
