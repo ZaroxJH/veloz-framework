@@ -15,20 +15,13 @@ To install the Veloz Framework, you will need to clone the skeleton repository a
 git clone https://github.com/zaroxjh/veloz.git
 ```
 
-2. Remove the Git version control from the cloned repository:
-
-```
-cd veloz
-rm -rf .git
-```
-
-3. Install PHP dependencies using Composer:
+2. Install PHP dependencies using Composer:
 
 ```
 composer install
 ```
 
-4. Install JavaScript dependencies using npm:
+3. Install JavaScript dependencies using npm:
 
 ```
 npm install
