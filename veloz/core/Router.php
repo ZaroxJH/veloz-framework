@@ -174,7 +174,6 @@ class Router
     public function match(string $method, string $uri): string|array|bool|null
     {
         foreach ($this->routes as $route) {
-
             if (!$route['allowAll']) {
                 if ($route['method'] === $method && preg_match($route['pattern'], $uri, $matches)) {
                     return $this->handleLoad($route, $method, $uri, $matches);
@@ -206,18 +205,21 @@ class Router
                 if ($this->numeric) {
                     if (str_contains($route['filtered'], '{slug}')) {
                 
-                        $lastSlashPos = strrpos($uri, '/');
-                        
-                        if ($lastSlashPos !== false) {
-                            $uri = substr($uri, 0, $lastSlashPos);
+                        // Gets the last slash, and removes everything after it
+                        $lastSlash = strrpos($uri, '/');
+
+                        // Checks if the last character of the uri is a number
+                        if (is_numeric(substr($uri, $lastSlash + 1))) {
+                            // Removes everything after the last slash
+                            $uri = substr($uri, 0, $lastSlash);
                         }
-                
+
                         $filtered = str_replace('/{slug}', '', $route['filtered']);
                 
                         if (str_contains($uri, $_ENV['APP_NAME'])) {
                             $uri = str_replace('/' . $_ENV['APP_NAME'], '', $uri);
                         }
-                
+
                         // If uri and filtered are the same, then we have a match
                         if ($uri === $filtered) {
                             return $this->handleLoad($route, $method, $uri, [$this->numeric]);
@@ -313,7 +315,7 @@ class Router
 
             // Create an instance of the controller class
             $controller = new $controllerClass();
-
+            
             // Call the action method on the controller and pass the arguments
             return $controller->$action(...$arguments);
         }

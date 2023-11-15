@@ -64,6 +64,8 @@ class Request
 
         $curl = curl_init($request_data['url']);
 
+        curl_setopt($curl, CURLOPT_SSL_VERIFYPEER, false);
+
         curl_setopt($curl, CURLOPT_RETURNTRANSFER, true);
         curl_setopt($curl, CURLOPT_CUSTOMREQUEST, $request_data['method']);
 

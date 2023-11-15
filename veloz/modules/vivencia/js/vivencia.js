@@ -13,6 +13,12 @@ document.addEventListener('DOMContentLoaded', function() {
     // Request onload
     request.onload = function() {
         if (request.status >= 200 && request.status < 400) {
+            // Test if JSON.parse is possible on this response, otherwise return
+            if (!JSON.parse(request.responseText)) {
+                console.error('Failed to parse data');
+                return;
+            }
+
             let response = JSON.parse(request.responseText) ?? {};
             let data = response;
 
@@ -54,11 +60,16 @@ document.addEventListener('DOMContentLoaded', function() {
                         for (let k = 0; k < element.options.length; k++) {
                             let option = element.options[k];
 
-                            // Check if the option value is the same as the value
-                            if (option.value === value) {
-                                // Set the selected option
-                                option.selected = true;
+                            // If the value is an integer, convert it to a string
+                            if (typeof value === 'number') {
+                                value = value.toString();
                             }
+
+                            // Check if the option value is the same as the value
+                            // if (option.value === value) {
+                            //     // Set the selected option
+                            //     option.selected = true;
+                            // }
                         }
                     } else if (element.tagName.toLowerCase() === 'textarea') {
                         // Set the value

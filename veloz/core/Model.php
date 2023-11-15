@@ -78,7 +78,7 @@ class Model
         return false;
     }
 
-    public static function get_all()
+    public static function get_all($set_as_key = false)
     {
         if (!self::connect()) {
             return false;
@@ -89,7 +89,19 @@ class Model
 
         $query = "SELECT $select FROM $table";
 
-        return DB::select($query);
+        $result = DB::select($query);
+
+        if ($set_as_key || is_string($set_as_key)) {
+            $return = [];
+
+            foreach ($result as $item) {
+                $return[$item[$set_as_key]] = $item;
+            }
+
+            return $return;
+        }
+
+        return $result;
     }
 
     public static function get_by_ids($ids)
@@ -165,7 +177,7 @@ class Model
         return $result ? $result[0]['COUNT(*)'] > 0 : false;
     }
 
-    public static function find($param)
+    public static function find($param, $array = false)
     {
         if (!self::connect()) {
             return false;
@@ -191,6 +203,10 @@ class Model
         $result = DB::select($query, $param);
 
         if ($result) {
+            if ($array) {
+                return $result[0] ?? false;
+            }
+            
             return (object) $result;
         }
 
@@ -243,6 +259,62 @@ class Model
     
         return DB::select($query);
     }
+
+    public static function paginate_where(array $params, $perPage, $ids = [])
+    {
+        if (!self::connect()) {
+            return false;
+        }
+    
+        $table = self::getTable();
+        $select = self::assignSelect($table);
+    
+        $page = 1;
+    
+        $validate = validate_get([
+            'page' => 'numeric'
+        ]);
+    
+        if ($validate) {
+            $page = $_GET['page'];
+        }
+    
+        $offset = ($page - 1) * $perPage;
+
+        $whereClause = '';
+        $in = [];
+
+        if (!empty($ids)) {
+            // This means there is a list of id's that we want to get
+            foreach ($ids as $key => $id) {
+                $in[] = $id;
+            }
+        }
+    
+        $whereClause = self::buildWhere($params, $in);
+
+        $countQuery = "SELECT COUNT(*) as total FROM $table WHERE $whereClause";
+        $countResult = DB::select($countQuery, $params);
+
+        if (is_array($countResult)) {
+            $totalCount = $countResult[0]['total'];
+        } else {
+            $totalCount = $countResult->total;
+        }
+    
+        $query = "SELECT $select FROM $table WHERE $whereClause LIMIT $perPage OFFSET $offset";
+    
+        $paginationData = [
+            'total' => $totalCount,
+            'per_page' => $perPage,
+            'current_page' => $page,
+            'page_amount' => ceil($totalCount / $perPage),
+        ];
+
+        set_pagination_data($paginationData);
+    
+        return DB::select($query, $params);
+    }
         
     /**
      * Gets all the rows from the table.
@@ -250,7 +322,7 @@ class Model
      * $col contains the id from the main table
      * $joinCols The first value is the id name from the joined table, the second contains the column we want to get
      */
-    public static function join($joinTables, $col, array $joinCols, $id)
+    public static function join($joinTables, $col, array $joinCols, $id = false)
     {
         $table = self::getTable();
         $select = self::assignSelect($table);
@@ -273,6 +345,11 @@ class Model
             $selects .= ", $joinTable." . $joinCols[$key][1];
         }
 
+        if (!$id) {
+            $query = "SELECT $table.$select $selects FROM $table $joins";
+            return new JoinResult($query);
+        }
+        
         $query = "SELECT $table.$select $selects FROM $table $joins WHERE $id[0] = :id";
 
         return new JoinResult($query, ['id' => $id[1]]);
@@ -293,6 +370,7 @@ class Model
 
         $columns = implode(', ', array_keys($params));
         $values = implode(', ', array_fill(0, count($params), '?'));
+
         $query = "INSERT INTO $table ($columns) VALUES ($values)";
 
         return DB::insert($query, array_values($params));
@@ -318,6 +396,32 @@ class Model
         $query = "UPDATE $table SET $set WHERE id = :id";
 
         $params['id'] = $id;
+
+        return DB::update($query, $params);
+    }
+
+    public static function update_where(array $params, array $where)
+    {
+        if (!self::connect()) {
+            return false;
+        }
+
+        $table = self::getTable();
+
+        $set = '';
+
+        foreach ($params as $param => $value) {
+            $set .= $param . ' = :' . $param;
+            $set .= ', ';
+        }
+
+        $set = rtrim($set, ', ');
+
+        $whereClause = self::buildWhere($where);
+
+        $query = "UPDATE $table SET $set WHERE $whereClause";
+
+        $params = array_merge($params, $where);
 
         return DB::update($query, $params);
     }
@@ -391,21 +495,39 @@ class Model
         return $reflection->getProperty('table')->getValue(new $model);
     }
 
-    private static function buildWhere($params)
+    private static function buildWhere($params, $in = [], $like = false)
     {
         $whereClause = '';
 
-        foreach ($params as $param => $value) {
-            $whereClause .= $param . ' = :' . $param;
-            $whereClause .= ' AND ';
+        if (!$like) {
+            foreach ($params as $param => $value) {
+                $whereClause .= $param . ' = :' . $param;
+                $whereClause .= ' AND ';
+            }
+        } else {
+            foreach ($params as $param => $value) {
+                // Checks if this is the last value
+                if (next($params) === false) {
+                    $whereClause .= $param . ' LIKE :' . $param;
+                    $whereClause .= ' AND ';
+                    continue;
+                } else {
+                    $whereClause .= $param . ' = :' . $param;
+                    $whereClause .= ' AND ';
+                }
+            }
         }
 
         $whereClause = rtrim($whereClause, ' AND ');
 
+        if (!empty($in)) {
+            $whereClause .= ' AND id IN (' . implode(', ', $in) . ')';
+        }
+
         return $whereClause;
     }
 
-    public static function where($column, $value, $select = null)
+    public static function where($column, $value, $select = null, $options = [])
     {
         $table = self::getTable();
 
@@ -413,17 +535,76 @@ class Model
             return false;
         }
 
-        if (!is_array($column)) {
-            $column = [$column];
-            $value = [$value];
+        $like = false;
+        $in = [];
+
+        if (isset($options['like'])) {
+            $like = $options['like'];
+
+            // Checks if strength was set
+            if (isset($options['strength'])) {
+                $strength = $options['strength'];
+
+                // Checks if strength is a string
+                if (!is_string($strength)) {
+                    throw new \Exception('Strength must be a string');
+                }
+
+                // Checks if strength is a valid value
+                if (!in_array($strength, ['start', 'end', 'both'])) {
+                    throw new \Exception('Strength must be either start, end or both');
+                }
+
+                // Checks if the value is a string
+                // if (!is_string($value)) {
+                //     throw new \Exception('Value must be a string');
+                // }
+            }
         }
 
-        $select = $select ?? '*';
+        if (isset($options['in'])) {
+            $in = $options['in'];
+        }
 
-        // Combine the columns and values into a single array
-        $params = array_combine($column, $value);
+        if (!$column === false && !$value === false) {
+            if (!is_array($column)) {
+                $column = [$column];
+                $value = [$value];
+            }
+            if ($like) {
+                // Gets last value from the array
+                $last_value = $value[count($value) - 1];
 
-        $whereClause = self::buildWhere($params);
+                // Checks if the strength is start
+                if ($strength === 'start') {
+                    $last_value = $last_value . '%';
+                }
+
+                // Checks if the strength is end
+                if ($strength === 'end') {
+                    $last_value = '%' . $last_value;
+                }
+
+                // Checks if the strength is both
+                if ($strength === 'both') {
+                    $last_value = '%' . $last_value . '%';
+                }
+
+                // Sets the last value to the new value
+                $value[count($value) - 1] = $last_value;
+            }
+
+            $select = $select ?? '*';
+
+            // Combine the columns and values into a single array
+            $params = array_combine($column, $value);
+
+            $whereClause = self::buildWhere($params, [], $like);
+        } else {
+            $select = $select ?? '*';
+            $whereClause = '1 = 1';
+            $params = [];
+        }
 
         $query = "SELECT $select FROM $table WHERE $whereClause";
 
@@ -452,6 +633,11 @@ class JoinResult {
     public function __construct($query, $params = []) {
         $this->query = $query;
         $this->params = $params;
+    }
+    public function asc($col)
+    {
+        $this->query .= " ORDER BY $col ASC";
+        return $this;
     }
     public function desc($col)
     {

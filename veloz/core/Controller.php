@@ -104,12 +104,19 @@ class Controller extends View
 
         if ($includeLayout) {
             if (is_string($includeLayout)) {
+                // If the string is set to single
+                if ($includeLayout === 'single') {
+                    $this->single = true;
+                    $layout = false;
+                }
                 if (!str_ends_with($includeLayout, '.php')) {
                     $includeLayout .= '.php';
                 }
                 $layoutFile = $includeLayout;
             }
-            $layout = $root . $_ENV['C_ROOT'] . 'views/layouts/' . $layoutFile;
+            if (!$this->single) {
+                $layout = $root . $_ENV['C_ROOT'] . 'views/layouts/' . $layoutFile;
+            }
         }
 
         $this->set_new_path($ori_path);

@@ -707,6 +707,8 @@ if (! function_exists('setup_server')) {
 if (! function_exists('set_headers')) {
     function set_headers()
     {
+        // Header for noindex
+        header('X-Robots-Tag: noindex, nofollow');
         header('X-Content-Type-Options: nosniff');
         header('X-XSS-Protection: 1; mode=block');
         header('X-Frame-Options: DENY');

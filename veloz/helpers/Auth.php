@@ -28,6 +28,7 @@ class Auth
 
         // Now we check if the session exists in the database
         if (!Session::exists(['user_id' => Auth::id(), 'session_id' => $_SESSION[$_ENV['APP_NAME']]['user']['sessionId']])) {
+            set_exception('Your session has expired (this could be due to another user logging into your account)', 'warning', true);
             return false;
         }
 

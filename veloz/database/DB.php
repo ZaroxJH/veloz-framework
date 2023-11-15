@@ -32,6 +32,8 @@ class DB
             self::$pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
         } catch (\PDOException $e) {
             self::$databaseError = $e->getMessage();
+            var_dump($e->getMessage());
+            exit;
             return false;
         }
 

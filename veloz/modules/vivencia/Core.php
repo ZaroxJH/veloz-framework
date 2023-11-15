@@ -35,6 +35,16 @@ class Core
 
                 array_push($final_data, $new_result);
             }
+        } else {
+            // In this case the bind:name is a database field
+            foreach ($data as $result => $value) {
+                $new_result = [];
+
+                $new_result['bind_to'] = $result;
+                $new_result['value'] = $value;
+
+                array_push($final_data, $new_result);
+            }
         }
 
         $_SESSION['bind_data'] = $final_data;
