@@ -14,8 +14,8 @@
   },
   "autoload": {
     "files": [
-      "veloz/helpers/helpers.php",
-      "veloz/config.php"
+      "veloz/config.php",
+      "veloz/helpers/helpers.php"
     ],
     "psr-4": {
       "Veloz\\": "veloz"
